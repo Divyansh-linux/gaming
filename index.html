@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bubble Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+      background: rgb(49, 110, 80);
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+    }
+
+    #scoreDisplay, #missDisplay {
+      text-align: center;
+      margin: 10px;
+      font-size: 20px;
+      color: white;
+    }
+
+    #gamearea {
+      position: relative;
+      height: 80vh;
+      border: 2px solid #333;
+      background: rgb(86, 142, 187);
+      overflow: hidden;
+    }
+
+    .bubble {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #ff8;
+      color: #000;
+      font-size: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+    }
+
+    #gameover {
+      display: none;
+      text-align: center;
+      color: red;
+      font-size: 30px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>THE BUBBLE POP GAME</h1>
+  <p id="scoreDisplay">Score: <span id="score">0</span></p>
+  <p id="missDisplay">Misses left: <span id="misses">5</span></p>
+
+  <div id="gamearea"></div>
+  <div id="gameover">Game Over! Refresh to play again.</div>
+
+  <script>
+    const gamearea = document.getElementById('gamearea');
+    let score = 0;
+    let missed = 0;
+    let gameOver = false;
+
+    let bubbleInterval = setInterval(() => {
+      if (!gameOver) {
+        createBubble();
+      }
+    }, 800);
+
+    function createBubble() {
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+
+      const isLetter = Math.random() < 0.5;
+      let charCode = isLetter
+        ? 65 + Math.floor(Math.random() * 26) // A-Z
+        : 48 + Math.floor(Math.random() * 10); // 0-9
+
+      const letter = String.fromCharCode(charCode);
+      bubble.textContent = letter;
+
+      bubble.style.left = Math.random() * (window.innerWidth - 50) + "px";
+      bubble.style.bottom = "0px";
+
+      gamearea.appendChild(bubble);
+
+      let bottomPosition = 0;
+      const moveUp = setInterval(() => {
+        if (gameOver) {
+          clearInterval(moveUp);
+          return;
+        }
+
+        bottomPosition += 2;
+        bubble.style.bottom = bottomPosition + "px";
+
+        if (bottomPosition > window.innerHeight) {
+          clearInterval(moveUp);
+          if (!gameOver) {
+            bubble.remove();
+            missed++;
+
+            if (missed >= 5) {
+              document.getElementById("misses").textContent = 0;
+              endGame();
+            } else {
+              document.getElementById("misses").textContent = 5 - missed;
+            }
+          }
+        }
+      }, 20);
+    }
+
+    function endGame() {
+      gameOver = true;
+      clearInterval(bubbleInterval); // Stop new bubbles
+
+      // Remove all on-screen bubbles
+      const bubbles = document.querySelectorAll(".bubble");
+      bubbles.forEach(bubble => bubble.remove());
+
+      document.getElementById('gameover').style.display = 'block';
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (gameOver) return;
+
+      const pressedKey = event.key.toUpperCase();
+      const bubbles = document.querySelectorAll(".bubble");
+
+      bubbles.forEach(function(bubble) {
+        if (bubble.textContent == pressedKey) {
+          bubble.remove();
+          score++;
+          document.getElementById('score').textContent = score;
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
